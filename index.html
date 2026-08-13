@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="id" class="dark h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paguyuban Eighter Management System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: 'var(--color-brand-50, #f0f9ff)',
+                            100: 'var(--color-brand-100, #e0f2fe)',
+                            500: 'var(--color-brand-500, #0284c7)',
+                            600: 'var(--color-brand-600, #0284c7)',
+                            700: 'var(--color-brand-700, #0369a1)',
+                            800: 'var(--color-brand-800, #075985)',
+                            900: 'var(--color-brand-900, #0c4a6e)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for Interactive Financial & Activity Data -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-brand-500: #3b82f6;
+            --color-brand-600: #2563eb;
+            --color-brand-700: #1d4ed8;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbars for slick modern look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+    <div id="app" class="min-h-screen flex flex-col md:flex-row relative overflow-x-hidden">
+        
+        <!-- SIDEBAR NAVIGATION (Desktop & Tablet) -->
+        <aside id="sidebar" class="w-64 bg-gray-900 border-r border-gray-800 flex-col justify-between hidden md:flex shrink-0 z-30 transition-all duration-300">
+            <div>
+                <!-- Brand Header -->
+                <div class="p-5 border-b border-gray-800 flex items-center gap-3">
+                    <div id="appLogoContainer" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden shrink-0">
+                        <i id="appLogoIcon" class="fa-solid fa-users text-white text-lg"></i>
+                        <img id="appLogoImg" class="w-full h-full object-cover hidden" alt="Logo">
+                    </div>
+                    <div class="overflow-hidden">
+                        <h1 id="sidebarAppName" class="font-bold text-base tracking-tight text-white truncate">Paguyuban Eighter</h1>
+                        <p class="text-xs text-blue-400 font-medium tracking-wide">MANAGEMENT SYSTEM</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="p-3 space-y-1 text-sm font-medium">
+                    <!-- Dynamic Navigation JS injected based on role -->
+                    <div id="navMenuItems" class="space-y-1"></div>
+                </nav>
+            </div>
+
+            <!-- User Info & Logout Sidebar Footer -->
+            <div class="p-4 border-t border-gray-800 bg-gray-900/50">
+                <div class="flex items-center gap-3 mb-3">
+                    <img id="userAvatar" src="https://placehold.co/100x100/1e293b/ffffff?text=User" class="w-9 h-9 rounded-full object-cover border border-gray-700" alt="Avatar">
+                    <div class="overflow-hidden">
+                        <p id="userNameDisplay" class="text-sm font-semibold text-white truncate">Loading...</p>
+                        <span id="userRoleBadge" class="inline-block px-2 py-0.5 text-[10px] uppercase font-bold rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">MEMBER</span>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full py-2 px-3 rounded-lg bg-gray-800 hover:bg-red-500/10 hover:text-red-400 border border-gray-700 hover:border-red-500/30 text-gray-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout Aplikasi
+                </button>
+            </div>
+        </aside>
+
+        <!-- MOBILE TOP BAR -->
+        <header class="md:hidden bg-gray-900 border-b border-gray-800 p-4 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                    E8
+                </div>
+                <div>
+                    <h1 id="mobileAppName" class="font-bold text-sm text-white truncate">Paguyuban Eighter</h1>
+                    <p class="text-[10px] text-blue-400 font-semibold">MANAGEMENT</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleMobileMenu()" class="p-2 text-gray-300 hover:text-white rounded-lg bg-gray-800">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MOBILE NAV OVERLAY -->
+        <div id="mobileMenu" class="fixed inset-0 bg-gray-950/90 z-50 hidden flex-col p-5 md:hidden backdrop-blur-md">
+            <div class="flex justify-between items-center pb-4 border-b border-gray-800 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg">E8</div>
+                    <div>
+                        <h2 id="mobileMenuTitle" class="font-bold text-base text-white">Paguyuban Eighter</h2>
+                        <p class="text-xs text-blue-400">Navigasi Utama</p>
+                    </div>
+                </div>
+                <button onclick="toggleMobileMenu()" class="p-2 text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div id="mobileNavMenuItems" class="space-y-2 flex-1 overflow-y-auto"></div>
+            <div class="pt-4 border-t border-gray-800">
+                <button onclick="logout()" class="w-full py-3 bg-red-600/20 text-red-400 border border-red-500/30 rounded-xl font-bold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col min-w-0 bg-gray-950 overflow-y-auto">
+            
+            <!-- TOP BAR HEADER (Desktop Search & Action Header) -->
+            <header class="bg-gray-900/60 border-b border-gray-800/80 px-6 py-4 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
+                <div class="flex items-center gap-4">
+                    <h2 id="pageTitle" class="text-xl font-bold text-white tracking-tight">Dashboard</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="#public-check" onclick="navigateTo('public-check')" class="px-3.5 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 text-xs font-semibold flex items-center gap-2 transition">
+                        <i class="fa-solid fa-id-card"></i> <span class="hidden sm:inline">Cek Anggota Publik</span>
+                    </a>
+                    <button onclick="toggleThemeMode()" title="Toggle Dark/Light" class="p-2 rounded-lg bg-gray-800 text-gray-300 hover:text-white border border-gray-700">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- DYNAMIC VIEW ENGINE -->
+            <div id="contentView" class="p-4 md:p-8 flex-1 space-y-6">
+                <!-- Content will be dynamic via JS -->
+            </div>
+
+            <!-- FOOTER -->
+            <footer class="p-6 border-t border-gray-900 text-center text-xs text-gray-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+                <p>&copy; 2026 <span id="footerAppName">Paguyuban Eighter Management System</span>. All Rights Reserved.</p>
+                <p class="text-gray-600">Production-Ready Enterprise Edition v2.5</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- CAMERA CAPTURE MODAL -->
+    <div id="cameraModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-blue-500"></i> Ambil Foto Kamera Perangkat
+                </h3>
+                <button onclick="closeCameraModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-4 flex flex-col items-center bg-black relative">
+                <video id="webcamVideo" autoplay playsinline class="w-full h-64 object-cover rounded-xl border border-gray-800 bg-gray-950"></video>
+                <canvas id="webcamCanvas" class="hidden"></canvas>
+            </div>
+            <div class="p-4 border-t border-gray-800 flex justify-end gap-3 bg-gray-900/50">
+                <button onclick="closeCameraModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold">Batal</button>
+                <button onclick="captureCameraPhoto()" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-circle-dot"></i> Tangkap Foto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX MODAL FOR GALLERY -->
+    <div id="lightboxModal" class="fixed inset-0 bg-black/95 z-50 hidden flex flex-col justify-between p-4">
+        <div class="flex justify-between items-center text-white z-10">
+            <span id="lightboxCounter" class="text-sm font-semibold text-gray-400">1 / 1</span>
+            <div class="flex gap-3">
+                <button onclick="zoomLightbox(0.2)" class="p-2 bg-gray-800 rounded-lg hover:bg-gray-700"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                <button onclick="zoomLightbox(-0.2)" class="p-2 bg-gray-800 rounded-lg hover:bg-gray-700"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                <button onclick="closeLightbox()" class="p-2 bg-gray-800 rounded-lg hover:bg-red-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+        </div>
+        <div class="flex-1 flex items-center justify-center relative overflow-hidden my-4">
+            <button onclick="prevLightboxImage()" class="absolute left-2 top-1/2 -translate-y-1/2 p-3 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full z-10"><i class="fa-solid fa-chevron-left text-xl"></i></button>
+            <img id="lightboxImage" src="" class="max-h-full max-w-full object-contain transition-transform duration-200" alt="Gallery preview">
+            <button onclick="nextLightboxImage()" class="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full z-10"><i class="fa-solid fa-chevron-right text-xl"></i></button>
+        </div>
+        <p id="lightboxCaption" class="text-center text-sm text-gray-300 z-10 truncate px-4"></p>
+    </div>
+
+    <!-- GLOBAL TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+
+        // Default App Settings
+        const DEFAULT_SETTINGS = {
+            appName: "Paguyuban Eighter Management System",
+            logo: "",
+            description: "Wadah Silaturahmi dan Komunikasi Keluarga Besar Eighter Indonesia",
+            themeColor: "#0284c7"
+        };
+
+        const DEFAULT_BANK = {
+            namaBank: "Bank Central Asia (BCA)",
+            pemilik: "Paguyuban Eighter Indonesia",
+            nomorRekening: "8830-9912-4410",
+            qris: ""
+        };
+
+        // State Store
+        let state = {
+            currentUser: null, // { username, role, member_id }
+            settings: { ...DEFAULT_SETTINGS },
+            bank: { ...DEFAULT_BANK },
+            users: [],
+            anggota: [],
+            pasangan: [],
+            anak: [],
+            iuran: [],
+            kegiatan: [],
+            kegiatanFoto: [],
+            komentar: [],
+            // UI state
+            currentPage: 1,
+            pageSize: 50,
+            searchQuery: "",
+            cameraTargetCallback: null,
+            lightbox: { photos: [], currentIndex: 0, scale: 1 }
+        };
+
+        // Initial Seed Generator if database is empty
+        function seedDatabaseIfEmpty() {
+            if (!localStorage.getItem('e8_settings')) {
+                localStorage.setItem('e8_settings', JSON.stringify(DEFAULT_SETTINGS));
+            }
+            if (!localStorage.getItem('e8_bank')) {
+                localStorage.setItem('e8_bank', JSON.stringify(DEFAULT_BANK));
+            }
+
+            if (!localStorage.getItem('e8_users')) {
+                const initialUsers = [
+                    { id: "usr-1", username: "admin", password_hash: "admin123", role: "ADMIN", member_id: "BC8-2026-00001", created_at: "2026-01-01" },
+                    { id: "usr-2", username: "member", password_hash: "member123", role: "MEMBER", member_id: "BC8-2026-00002", created_at: "2026-01-02" },
+                    { id: "usr-3", username: "member", password_hash: "member123", role: "MEMBER", member_id: "BC8-2026-00003", created_at: "2026-01-03" }
+                ];
+                localStorage.setItem('e8_users', JSON.stringify(initialUsers));
+            }
+
+            if (!localStorage.getItem('e8_anggota')) {
+                const initialAnggota = [
+                    {
+                        id: "ang-1",
+                        nomor_anggota: "BC8-2026-00001",
+                        nama: "Drs. Bambang Hariyanto",
+                        foto: "https://placehold.co/200x200/1e293b/38bdf8?text=Bambang",
+                        kantor: "PT Eighter Utama",
+                        homebase: "Jakarta Selatan",
+                        no_hp: "081298765432",
+                        email: "bambang@eighter.org",
+                        alamat: "Jl. Sudirman No. 45, Jakarta Pusat",
+                        tahun_gabung: "2024",
+                        status: "Aktif"
+                    },
+                    {
+                        id: "ang-2",
+                        nomor_anggota: "BC8-2026-00002",
+                        nama: "Budi Santoso, S.T.",
+                        foto: "https://placehold.co/200x200/1e293b/34d399?text=Budi",
+                        kantor: "Kementerian PUPR",
+                        homebase: "Bandung",
+                        no_hp: "081311223344",
+                        email: "budi.santoso@gmail.com",
+                        alamat: "Jl. Dago No. 120, Bandung",
+                        tahun_gabung: "2025",
+                        status: "Aktif"
+                    },
+                    {
+                        id: "ang-3",
+                        nomor_anggota: "BC8-2026-00003",
+                        nama: "Siti Rahmawati, M.A.",
+                        foto: "https://placehold.co/200x200/1e293b/f472b6?text=Siti",
+                        kantor: "Universitas Indonesia",
+                        homebase: "Depok",
+                        no_hp: "081599887766",
+                        email: "siti.rahma@ui.ac.id",
+                        alamat: "Margonda Raya No. 88, Depok",
+                        tahun_gabung: "2026",
+                        status: "Aktif"
+                    }
+                ];
+                localStorage.setItem('e8_anggota', JSON.stringify(initialAnggota));
+            }
+
+            if (!localStorage.getItem('e8_pasangan')) {
+                const initialPasangan = [
+                    { id: "pas-1", anggota_id: "ang-1", nama: "Ir. Endang Sri M.", foto: "", tanggal_lahir: "1980-05-12", no_hp: "081299001122", keterangan: "Istri" },
+                    { id: "pas-2", anggota_id: "ang-2", nama: "Rina Wijaya, S.E.", foto: "", tanggal_lahir: "1985-08-20", no_hp: "081322334455", keterangan: "Istri" }
+                ];
+                localStorage.setItem('e8_pasangan', JSON.stringify(initialPasangan));
+            }
+
+            if (!localStorage.getItem('e8_anak')) {
+                const initialAnak = [
+                    { id: "ank-1", anggota_id: "ang-1", nama: "Andi Hariyanto", foto: "", jenis_kelamin: "Laki-laki", tanggal_lahir: "2008-03-15", pendidikan: "SMA", pekerjaan: "Pelajar", keterangan: "Anak Pertama" },
+                    { id: "ank-2", anggota_id: "ang-1", nama: "Sinta Hariyanti", foto: "", jenis_kelamin: "Perempuan", tanggal_lahir: "2012-10-05", pendidikan: "SMP", pekerjaan: "Pelajar", keterangan: "Anak Kedua" },
+                    { id: "ank-3", anggota_id: "ang-2", nama: "Rudi Santoso", foto: "", jenis_kelamin: "Laki-laki", tanggal_lahir: "2015-01-22", pendidikan: "SD", pekerjaan: "Pelajar", keterangan: "Anak Tunggal" }
+                ];
+                localStorage.setItem('e8_anak', JSON.stringify(initialAnak));
+            }
+
+            if (!localStorage.getItem('e8_iuran')) {
+                const initialIuran = [
+                    { id: "iur-1", anggota_id: "ang-1", bulan: "Januari", tahun: "2026", jumlah: 150000, tanggal_bayar: "2026-01-05", status: "Lunas", metode: "Transfer BCA", keterangan: "Iuran Wajib" },
+                    { id: "iur-2", anggota_id: "ang-1", bulan: "Februari", tahun: "2026", jumlah: 150000, tanggal_bayar: "2026-02-02", status: "Lunas", metode: "Transfer QRIS", keterangan: "Iuran Wajib" },
+                    { id: "iur-3", anggota_id: "ang-2", bulan: "Januari", tahun: "2026", jumlah: 150000, tanggal_bayar: "2026-01-10", status: "Lunas", metode: "Transfer BCA", keterangan: "Iuran Wajib" },
+                    { id: "iur-4", anggota_id: "ang-2", bulan: "Februari", tahun: "2026", jumlah: 150000, tanggal_bayar: "", status: "Belum Bayar", metode: "-", keterangan: "Pending" },
+                    { id: "iur-5", anggota_id: "ang-3", bulan: "Januari", tahun: "2026", jumlah: 150000, tanggal_bayar: "2026-01-15", status: "Lunas", metode: "Cash", keterangan: "Iuran Wajib" }
+                ];
+                localStorage.setItem('e8_iuran', JSON.stringify(initialIuran));
+            }
+
+            if (!localStorage.getItem('e8_kegiatan')) {
+                const initialKegiatan = [
+                    {
+                        id: "keg-1",
+                        nama_kegiatan: "Grand Gathering & Silaturahmi Awal Tahun 2026",
+                        tanggal: "2026-01-20",
+                        tempat: "Hotel Savoy Homann, Bandung",
+                        deskripsi: "Acara silaturahmi tahunan Paguyuban Eighter menghimpun seluruh anggota keluarga besar.",
+                        created_by: "Admin Eighter",
+                        created_at: "2026-01-01",
+                        updated_at: "2026-01-01"
+                    },
+                    {
+                        id: "keg-2",
+                        nama_kegiatan: "Bakti Sosial & Santunan Anak Yatim",
+                        tanggal: "2026-02-14",
+                        tempat: "Panti Asuhan Kasih Ibu, Depok",
+                        deskripsi: "Penyaluran bantuan sosial dari dana kebersamaan paguyuban.",
+                        created_by: "Admin Eighter",
+                        created_at: "2026-02-01",
+                        updated_at: "2026-02-01"
+                    }
+                ];
+                localStorage.setItem('e8_kegiatan', JSON.stringify(initialKegiatan));
+            }
+
+            if (!localStorage.getItem('e8_kegiatan_foto')) {
+                const initialFotos = [
+                    { id: "kf-1", kegiatan_id: "keg-1", file_path: "https://placehold.co/600x400/1e293b/38bdf8?text=Gathering+1", sort_order: 1 },
+                    { id: "kf-2", kegiatan_id: "keg-1", file_path: "https://placehold.co/600x400/1e293b/34d399?text=Gathering+2", sort_order: 2 },
+                    { id: "kf-3", kegiatan_id: "keg-2", file_path: "https://placehold.co/600x400/1e293b/f472b6?text=Baksos+1", sort_order: 1 }
+                ];
+                localStorage.setItem('e8_kegiatan_foto', JSON.stringify(initialFotos));
+            }
+
+            if (!localStorage.getItem('e8_komentar')) {
+                const initialKomentar = [
+                    { id: "kom-1", kegiatan_id: "keg-1", user_id: "usr-2", nama: "Budi Santoso", foto: "https://placehold.co/100x100/1e293b/34d399?text=Budi", komentar: "Luar biasa acaranya meriah sekali, sukses terus Eighter!", tanggal: "2026-01-21 10:30" }
+                ];
+                localStorage.setItem('e8_komentar', JSON.stringify(initialKomentar));
+            }
+        }
+
+        function loadStateFromStorage() {
+            seedDatabaseIfEmpty();
+            state.settings = JSON.parse(localStorage.getItem('e8_settings')) || DEFAULT_SETTINGS;
+            state.bank = JSON.parse(localStorage.getItem('e8_bank')) || DEFAULT_BANK;
+            state.users = JSON.parse(localStorage.getItem('e8_users')) || [];
+            state.anggota = JSON.parse(localStorage.getItem('e8_anggota')) || [];
+            state.pasangan = JSON.parse(localStorage.getItem('e8_pasangan')) || [];
+            state.anak = JSON.parse(localStorage.getItem('e8_anak')) || [];
+            state.iuran = JSON.parse(localStorage.getItem('e8_iuran')) || [];
+            state.kegiatan = JSON.parse(localStorage.getItem('e8_kegiatan')) || [];
+            state.kegiatanFoto = JSON.parse(localStorage.getItem('e8_kegiatan_foto')) || [];
+            state.komentar = JSON.parse(localStorage.getItem('e8_komentar')) || [];
+            
+            const savedSession = sessionStorage.getItem('e8_session');
+            if (savedSession) {
+                state.currentUser = JSON.parse(savedSession);
+            }
+        }
+
+        function saveEntityToStorage(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-600/90 text-white' : type === 'error' ? 'bg-red-600/90 text-white' : 'bg-blue-600/90 text-white';
+            const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info';
+
+            toast.className = `px-4 py-3 rounded-xl shadow-xl border border-white/10 ${bgClass} flex items-center gap-3 text-xs font-semibold backdrop-blur-md transition-all duration-300 transform translate-y-2 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i> <span>${message}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Auto Member ID Generator: BC8-YYYY-00001
+        function generateAutoMemberNo() {
+            const currentYear = new Date().getFullYear();
+            const yearPrefix = `BC8-${currentYear}-`;
+            
+            const existingNumbers = state.anggota
+                .map(a => a.nomor_anggota)
+                .filter(no => no && no.startsWith(yearPrefix));
+            
+            let maxSeq = 0;
+            existingNumbers.forEach(no => {
+                const seqStr = no.replace(yearPrefix, '');
+                const seq = parseInt(seqStr, 10);
+                if (!isNaN(seq) && seq > maxSeq) {
+                    maxSeq = seq;
+                }
+            });
+
+            const nextSeq = (maxSeq + 1).toString().padStart(5, '0');
+            return `${yearPrefix}${nextSeq}`;
+        }
+
+        let mediaStream = null;
+
+        function openCameraModal(callback) {
+            state.cameraTargetCallback = callback;
+            const modal = document.getElementById('cameraModal');
+            modal.classList.remove('hidden');
+            
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(stream => {
+                    mediaStream = stream;
+                    document.getElementById('webcamVideo').srcObject = stream;
+                })
+                .catch(err => {
+                    showToast('Gagal mengakses kamera: ' + err.message, 'error');
+                    closeCameraModal();
+                });
+        }
+
+        function closeCameraModal() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            document.getElementById('cameraModal').classList.add('hidden');
+        }
+
+        function captureCameraPhoto() {
+            const video = document.getElementById('webcamVideo');
+            const canvas = document.getElementById('webcamCanvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const base64Img = canvas.toDataURL('image/jpeg', 0.85);
+            
+            if (state.cameraTargetCallback) {
+                state.cameraTargetCallback(base64Img);
+            }
+            closeCameraModal();
+            showToast('Foto berhasil ditangkap!');
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function logout() {
+            state.currentUser = null;
+            sessionStorage.removeItem('e8_session');
+            showToast('Anda telah logout dari aplikasi');
+            renderApp();
+        }
+
+        function navigateTo(route) {
+            window.location.hash = route;
+            renderApp();
+        }
+
+        function toggleMobileMenu() {
+            const el = document.getElementById('mobileMenu');
+            el.classList.toggle('hidden');
+            el.classList.toggle('flex');
+        }
+
+        function updateBrandingAndTheme() {
+            const appName = state.settings.appName || DEFAULT_SETTINGS.appName;
+            document.getElementById('sidebarAppName').innerText = appName;
+            document.getElementById('mobileAppName').innerText = appName;
+            document.getElementById('mobileMenuTitle').innerText = appName;
+            document.getElementById('footerAppName').innerText = appName;
+            document.title = appName;
+
+            if (state.settings.logo) {
+                document.getElementById('appLogoImg').src = state.settings.logo;
+                document.getElementById('appLogoImg').classList.remove('hidden');
+                document.getElementById('appLogoIcon').classList.add('hidden');
+            } else {
+                document.getElementById('appLogoImg').classList.add('hidden');
+                document.getElementById('appLogoIcon').classList.remove('hidden');
+            }
+        }
+
+        function renderSidebarNav() {
+            const navContainer = document.getElementById('navMenuItems');
+            const mobileNavContainer = document.getElementById('mobileNavMenuItems');
+            const userRole = state.currentUser ? state.currentUser.role : 'GUEST';
+            
+            let navItems = [];
+
+            if (userRole === 'ADMIN') {
+                navItems = [
+                    { route: 'admin-dashboard', label: 'Dashboard Admin', icon: 'fa-chart-pie' },
+                    { route: 'anggota-list', label: 'Data Anggota', icon: 'fa-id-badge' },
+                    { route: 'iuran-management', label: 'Kelola Iuran', icon: 'fa-hand-holding-dollar' },
+                    { route: 'keuangan-dashboard', label: 'Dashboard Keuangan', icon: 'fa-wallet' },
+                    { route: 'kegiatan-list', label: 'Kegiatan & Galeri', icon: 'fa-calendar-days' },
+                    { route: 'bank-settings', label: 'Data Bank & QRIS', icon: 'fa-building-columns' },
+                    { route: 'settings', label: 'Pengaturan Sistem', icon: 'fa-sliders' },
+                    { route: 'public-check', label: 'Cek Anggota Publik', icon: 'fa-users-viewfinder' }
+                ];
+            } else if (userRole === 'MEMBER') {
+                navItems = [
+                    { route: 'member-dashboard', label: 'Dashboard Saya', icon: 'fa-house-user' },
+                    { route: 'member-profile', label: 'Profil Saya', icon: 'fa-user' },
+                    { route: 'member-iuran', label: 'Riwayat Iuran', icon: 'fa-file-invoice-dollar' },
+                    { route: 'kegiatan-list', label: 'Kegiatan & Galeri', icon: 'fa-calendar-days' },
+                    { route: 'public-check', label: 'Cek Anggota Publik', icon: 'fa-users-viewfinder' }
+                ];
+            } else {
+                navItems = [
+                    { route: 'public-check', label: 'Cek Anggota Publik', icon: 'fa-users-viewfinder' },
+                    { route: 'login', label: 'Login Member / Admin', icon: 'fa-right-to-bracket' }
+                ];
+            }
+
+            const activeRoute = window.location.hash.replace('#', '') || (state.currentUser ? (userRole === 'ADMIN' ? 'admin-dashboard' : 'member-dashboard') : 'login');
+
+            let html = '';
+            navItems.forEach(item => {
+                const isActive = activeRoute === item.route;
+                const activeClass = isActive 
+                    ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/20' 
+                    : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200';
+                
+                html += `
+                    <a href="#${item.route}" onclick="navigateTo('${item.route}')" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-xs font-medium ${activeClass}">
+                        <i class="fa-solid ${item.icon} w-5 text-center text-sm"></i>
+                        <span>${item.label}</span>
+                    </a>
+                `;
+            });
+
+            navContainer.innerHTML = html;
+            mobileNavContainer.innerHTML = html;
+
+            if (state.currentUser) {
+                const memberData = state.anggota.find(a => a.nomor_anggota === state.currentUser.member_id);
+                document.getElementById('userNameDisplay').innerText = memberData ? memberData.nama : state.currentUser.username;
+                document.getElementById('userRoleBadge').innerText = state.currentUser.role;
+                if (memberData && memberData.foto) {
+                    document.getElementById('userAvatar').src = memberData.foto;
+                }
+            }
+        }
+
+        function renderApp() {
+            loadStateFromStorage();
+            updateBrandingAndTheme();
+            renderSidebarNav();
+
+            let route = window.location.hash.replace('#', '');
+            if (!route) {
+                route = state.currentUser ? (state.currentUser.role === 'ADMIN' ? 'admin-dashboard' : 'member-dashboard') : 'login';
+            }
+
+            // Route protection
+            if (!state.currentUser && route !== 'public-check' && route !== 'login') {
+                route = 'login';
+            }
+
+            const contentView = document.getElementById('contentView');
+            const pageTitle = document.getElementById('pageTitle');
+
+            switch (route) {
+                case 'login':
+                    pageTitle.innerText = "Login Sistem";
+                    contentView.innerHTML = renderLoginView();
+                    break;
+
+                case 'admin-dashboard':
+                    if (state.currentUser?.role !== 'ADMIN') return navigateTo('member-dashboard');
+                    pageTitle.innerText = "Dashboard Utama Admin";
+                    contentView.innerHTML = renderAdminDashboardView();
+                    initAdminCharts();
+                    break;
+
+                case 'member-dashboard':
+                    pageTitle.innerText = "Dashboard Member";
+                    contentView.innerHTML = renderMemberDashboardView();
+                    break;
+
+                case 'anggota-list':
+                    if (state.currentUser?.role !== 'ADMIN') return navigateTo('member-dashboard');
+                    pageTitle.innerText = "Manajemen Data Anggota";
+                    contentView.innerHTML = renderAnggotaListView();
+                    break;
+
+                case 'anggota-detail':
+                    pageTitle.innerText = "Detail Profil Anggota";
+                    contentView.innerHTML = renderAnggotaDetailView();
+                    break;
+
+                case 'iuran-management':
+                    if (state.currentUser?.role !== 'ADMIN') return navigateTo('member-dashboard');
+                    pageTitle.innerText = "Kelola Iuran Anggota";
+                    contentView.innerHTML = renderIuranManagementView();
+                    break;
+
+                case 'member-iuran':
+                    pageTitle.innerText = "Riwayat Iuran Anggota";
+                    contentView.innerHTML = renderMemberIuranView();
+                    break;
+
+                case 'keuangan-dashboard':
+                    if (state.currentUser?.role !== 'ADMIN') return navigateTo('member-dashboard');
+                    pageTitle.innerText = "Dashboard Keuangan Paguyuban";
+                    contentView.innerHTML = renderKeuanganDashboardView();
+                    initKeuanganChart('bar');
+                    break;
+
+                case 'kegiatan-list':
+                    pageTitle.innerText = "Kegiatan & Galeri Foto";
+                    contentView.innerHTML = renderKegiatanListView();
+                    break;
+
+                case 'kegiatan-detail':
+                    pageTitle.innerText = "Detail Kegiatan & Galeri";
+                    contentView.innerHTML = renderKegiatanDetailView();
+                    break;
+
+                case 'bank-settings':
+                    if (state.currentUser?.role !== 'ADMIN') return navigateTo('member-dashboard');
+                    pageTitle.innerText = "Data Bank & Payment QRIS";
+                    contentView.innerHTML = renderBankSettingsView();
+                    break;
+
+                case 'settings':
+                    if (state.currentUser?.role !== 'ADMIN') return navigateTo('member-dashboard');
+                    pageTitle.innerText = "Pengaturan Sistem Organisasi";
+                    contentView.innerHTML = renderSettingsView();
+                    break;
+
+                case 'public-check':
+                    pageTitle.innerText = "Verifikasi Keanggotaan Publik";
+                    contentView.innerHTML = renderPublicCheckView();
+                    break;
+
+                default:
+                    pageTitle.innerText = "Halaman Tidak Ditemukan";
+                    contentView.innerHTML = `<div class="text-center py-20 text-gray-400"><p>Halaman tidak ditemukan.</p></div>`;
+            }
+        }
+
+        function renderLoginView() {
+            return `
+            <div class="max-w-md mx-auto my-10 bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 rounded-full blur-2xl"></div>
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-blue-600/20 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/30">
+                        <i class="fa-solid fa-user-shield text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white tracking-tight">${state.settings.appName}</h2>
+                    <p class="text-xs text-gray-400 mt-1">Silakan masuk menggunakan akun terdaftar</p>
+                </div>
+
+                <form onsubmit="handleLoginSubmit(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Username / Email</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="text" id="loginUsername" required placeholder="Contoh: admin / budi" class="w-full bg-gray-950 border border-gray-800 rounded-xl pl-10 pr-4 py-3 text-xs text-white focus:outline-none focus:border-blue-500 transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Password</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="password" id="loginPassword" required placeholder="Masukkan password" class="w-full bg-gray-950 border border-gray-800 rounded-xl pl-10 pr-10 py-3 text-xs text-white focus:outline-none focus:border-blue-500 transition">
+                            <button type="button" onclick="togglePasswordVisibility('loginPassword', 'eyeIcon')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                                <i id="eyeIcon" class="fa-solid fa-eye text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/25 transition">
+                        Masuk Sistem
+                    </button>
+                </form>
+
+                <div class="mt-8 pt-6 border-t border-gray-800 text-center">
+                    <p class="text-xs text-gray-500">Demo Login Quick Access:</p>
+                    <div class="flex justify-center gap-2 mt-2">
+                        <button onclick="fillDemoLogin('admin', 'admin123')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-blue-400 rounded-lg text-[11px] font-semibold">Admin</button>
+                        <button onclick="fillDemoLogin('budi', 'member123')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded-lg text-[11px] font-semibold">Member (Budi)</button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash text-sm';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye text-sm';
+            }
+        }
+
+        function fillDemoLogin(user, pass) {
+            document.getElementById('loginUsername').value = user;
+            document.getElementById('loginPassword').value = pass;
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value.trim();
+
+            const found = state.users.find(usr => usr.username.toLowerCase() === u.toLowerCase() && usr.password_hash === p);
+            if (found) {
+                state.currentUser = found;
+                sessionStorage.setItem('e8_session', JSON.stringify(found));
+                showToast(`Selamat datang kembali, ${found.username}!`);
+                navigateTo(found.role === 'ADMIN' ? 'admin-dashboard' : 'member-dashboard');
+            } else {
+                showToast('Username atau password tidak valid!', 'error');
+            }
+        }
+
+        function renderAdminDashboardView() {
+            const totalAnggota = state.anggota.length;
+            const aktifAnggota = state.anggota.filter(a => a.status === 'Aktif').length;
+            
+            const totalMasuk = state.iuran.filter(i => i.status === 'Lunas').reduce((sum, i) => sum + (Number(i.jumlah) || 0), 0);
+            const totalKeluar = 150000; // Mock standard expense
+            const saldo = totalMasuk - totalKeluar;
+            const totalKegiatan = state.kegiatan.length;
+
+            return `
+            <!-- Top Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Anggota</p>
+                    <h3 class="text-2xl font-extrabold text-white mt-1">${totalAnggota}</h3>
+                    <span class="text-[10px] text-blue-400 font-semibold flex items-center gap-1 mt-1"><i class="fa-solid fa-users"></i> Registrasi</span>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Anggota Aktif</p>
+                    <h3 class="text-2xl font-extrabold text-emerald-400 mt-1">${aktifAnggota}</h3>
+                    <span class="text-[10px] text-emerald-500 font-semibold flex items-center gap-1 mt-1"><i class="fa-solid fa-check"></i> Status Aktif</span>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Penerimaan</p>
+                    <h3 class="text-lg font-extrabold text-blue-400 mt-1">Rp ${totalMasuk.toLocaleString('id-ID')}</h3>
+                    <span class="text-[10px] text-gray-400 mt-1 block">Kas Iuran Masuk</span>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Pengeluaran</p>
+                    <h3 class="text-lg font-extrabold text-rose-400 mt-1">Rp ${totalKeluar.toLocaleString('id-ID')}</h3>
+                    <span class="text-[10px] text-gray-400 mt-1 block">Kas Kegiatan</span>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Saldo Kas Bersih</p>
+                    <h3 class="text-lg font-extrabold text-amber-400 mt-1">Rp ${saldo.toLocaleString('id-ID')}</h3>
+                    <span class="text-[10px] text-emerald-400 font-semibold mt-1 block">Surplus</span>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Kegiatan</p>
+                    <h3 class="text-2xl font-extrabold text-indigo-400 mt-1">${totalKegiatan}</h3>
+                    <span class="text-[10px] text-indigo-400 font-semibold mt-1 block">Telah Terlaksana</span>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-blue-500"></i> Pertumbuhan Anggota & Iuran
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartGrowth"></canvas>
+                    </div>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-emerald-500"></i> Status Kelengkapan Iuran Bulan Ini
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartDues"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Members Table Preview -->
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                <div class="p-5 border-b border-gray-800 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-blue-500"></i> Registrasi Anggota Terbaru
+                    </h3>
+                    <a href="#anggota-list" onclick="navigateTo('anggota-list')" class="text-xs font-semibold text-blue-400 hover:text-blue-300">Lihat Semua</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-950 text-gray-400 font-semibold border-b border-gray-800">
+                            <tr>
+                                <th class="p-4">Anggota</th>
+                                <th class="p-4">Nomor Anggota</th>
+                                <th class="p-4">Kantor</th>
+                                <th class="p-4">Tahun Gabung</th>
+                                <th class="p-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800/60">
+                            ${state.anggota.slice(0, 5).map(a => `
+                                <tr class="hover:bg-gray-800/40 transition">
+                                    <td class="p-4 flex items-center gap-3">
+                                        <img src="${a.foto || 'https://placehold.co/100x100/1e293b/ffffff?text=E8'}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
+                                        <span class="font-bold text-white">${a.nama}</span>
+                                    </td>
+                                    <td class="p-4 font-mono text-blue-400 font-semibold">${a.nomor_anggota}</td>
+                                    <td class="p-4 text-gray-300">${a.kantor || '-'}</td>
+                                    <td class="p-4 text-gray-300">${a.tahun_gabung}</td>
+                                    <td class="p-4">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'Aktif' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400'}">${a.status}</span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            `;
+        }
+
+        function initAdminCharts() {
+            setTimeout(() => {
+                const ctx1 = document.getElementById('chartGrowth')?.getContext('2d');
+                if (ctx1) {
+                    new Chart(ctx1, {
+                        type: 'line',
+                        data: {
+                            labels: ['2022', '2023', '2024', '2025', '2026'],
+                            datasets: [{
+                                label: 'Jumlah Anggota Terdaftar',
+                                data: [1, 2, 2, 3, state.anggota.length],
+                                borderColor: '#0284c7',
+                                backgroundColor: 'rgba(2, 132, 199, 0.15)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: '#9ca3af' } } },
+                            scales: {
+                                x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                                y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } }
+                            }
+                        }
+                    });
+                }
+
+                const ctx2 = document.getElementById('chartDues')?.getContext('2d');
+                if (ctx2) {
+                    const lunasCount = state.iuran.filter(i => i.status === 'Lunas').length;
+                    const belumCount = state.iuran.filter(i => i.status !== 'Lunas').length;
+
+                    new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Lunas', 'Belum Bayar'],
+                            datasets: [{
+                                data: [lunasCount, belumCount || 1],
+                                backgroundColor: ['#10b981', '#f43f5e'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: '#9ca3af' }, position: 'bottom' } }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function renderMemberDashboardView() {
+            const member = state.anggota.find(a => a.nomor_anggota === state.currentUser?.member_id) || state.anggota[0];
+            const myIuran = state.iuran.filter(i => i.anggota_id === member?.id);
+            const recentKegiatan = state.kegiatan.slice(0, 3);
+
+            return `
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Profile Card -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col items-center text-center relative overflow-hidden">
+                    <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-blue-500 mb-4 shadow-xl">
+                        <img src="${member?.foto || 'https://placehold.co/200x200/1e293b/ffffff?text=E8'}" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-lg font-bold text-white">${member?.nama || state.currentUser?.username}</h3>
+                    <p class="font-mono text-xs text-blue-400 font-semibold mt-1">${member?.nomor_anggota || 'BC8-2026-00000'}</p>
+                    
+                    <div class="mt-3 inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        Status Keanggotaan: ${member?.status || 'Aktif'}
+                    </div>
+
+                    <div class="w-full mt-6 pt-6 border-t border-gray-800 text-left space-y-3 text-xs">
+                        <div class="flex justify-between text-gray-400">
+                            <span>Email:</span>
+                            <span class="text-white font-medium">${member?.email || '-'}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-400">
+                            <span>Nomor HP:</span>
+                            <span class="text-white font-medium">${member?.no_hp || '-'}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-400">
+                            <span>Kantor:</span>
+                            <span class="text-white font-medium">${member?.kantor || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dues & Activities Summary -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                        <h3 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-invoice-dollar text-emerald-500 mr-2"></i> Status Tagihan & Riwayat Iuran</span>
+                            <a href="#member-iuran" onclick="navigateTo('member-iuran')" class="text-xs text-blue-400 hover:text-blue-300">Detail Lengkap</a>
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            ${['Januari', 'Februari', 'Maret', 'April'].map(month => {
+                                const found = myIuran.find(i => i.bulan === month && i.tahun === '2026');
+                                const isLunas = found && found.status === 'Lunas';
+                                return `
+                                    <div class="p-3 rounded-xl border ${isLunas ? 'bg-emerald-950/30 border-emerald-800/50' : 'bg-red-950/30 border-red-800/50'} text-center">
+                                        <p class="text-[11px] font-bold text-gray-400">${month} 2026</p>
+                                        <span class="inline-block mt-2 px-2 py-0.5 text-[10px] font-bold rounded ${isLunas ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+                                            ${isLunas ? 'Lunas' : 'Belum Bayar'}
+                                        </span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Recent Activities Card -->
+                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                        <h3 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
+                            <span><i class="fa-solid fa-calendar-star text-indigo-500 mr-2"></i> Kegiatan Terbaru Paguyuban</span>
+                            <a href="#kegiatan-list" onclick="navigateTo('kegiatan-list')" class="text-xs text-blue-400 hover:text-blue-300">Lihat Semua</a>
+                        </h3>
+                        <div class="space-y-3">
+                            ${recentKegiatan.map(k => `
+                                <div class="p-3 rounded-xl bg-gray-950 border border-gray-800 flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-white">${k.nama_kegiatan}</h4>
+                                        <p class="text-[11px] text-gray-400 flex items-center gap-2 mt-0.5">
+                                            <span><i class="fa-regular fa-calendar text-blue-400"></i> ${k.tanggal}</span>
+                                            <span><i class="fa-solid fa-location-dot text-rose-400"></i> ${k.tempat}</span>
+                                        </p>
+                                    </div>
+                                    <button onclick="viewKegiatanDetail('${k.id}')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-gray-300 rounded-lg">Detail</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderAnggotaListView() {
+            const filtered = state.anggota.filter(a => {
+                const q = state.searchQuery.toLowerCase();
+                return a.nama.toLowerCase().includes(q) || a.nomor_anggota.toLowerCase().includes(q) || (a.kantor && a.kantor.toLowerCase().includes(q));
+            });
+
+            // Pagination calculation
+            const totalPages = Math.ceil(filtered.length / state.pageSize) || 1;
+            const startIdx = (state.currentPage - 1) * state.pageSize;
+            const paginated = filtered.slice(startIdx, startIdx + state.pageSize);
+
+            return `
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between gap-3 bg-gray-900 p-4 rounded-2xl border border-gray-800">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                        <input type="text" value="${state.searchQuery}" oninput="handleAnggotaSearch(this.value)" placeholder="Cari nama, nomor anggota, atau kantor..." class="w-full bg-gray-950 border border-gray-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button onclick="openAnggotaModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20">
+                        <i class="fa-solid fa-plus"></i> Tambah Anggota Baru
+                    </button>
+                </div>
+
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-950 text-gray-400 font-semibold border-b border-gray-800">
+                                <tr>
+                                    <th class="p-4">Foto & Nama Anggota</th>
+                                    <th class="p-4">Nomor Anggota</th>
+                                    <th class="p-4">Kantor / Homebase</th>
+                                    <th class="p-4">Kontak</th>
+                                    <th class="p-4">Pasangan & Anak</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800/60">
+                                ${paginated.length === 0 ? `<tr><td colspan="7" class="p-8 text-center text-gray-500">Data anggota tidak ditemukan.</td></tr>` : ''}
+                                ${paginated.map(a => {
+                                    const spouse = state.pasangan.find(p => p.anggota_id === a.id);
+                                    const childrenCount = state.anak.filter(c => c.anggota_id === a.id).length;
+                                    return `
+                                    <tr class="hover:bg-gray-800/40 transition">
+                                        <td class="p-4 flex items-center gap-3">
+                                            <img src="${a.foto || 'https://placehold.co/100x100/1e293b/ffffff?text=E8'}" class="w-10 h-10 rounded-full object-cover border border-gray-700">
+                                            <div>
+                                                <a href="#anggota-detail" onclick="viewAnggotaDetail('${a.id}')" class="font-bold text-white hover:text-blue-400 text-xs block">${a.nama}</a>
+                                                <span class="text-[10px] text-gray-400">${a.tahun_gabung ? 'Tahun ' + a.tahun_gabung : ''}</span>
+                                            </div>
+                                        </td>
+                                        <td class="p-4 font-mono text-blue-400 font-semibold">${a.nomor_anggota}</td>
+                                        <td class="p-4 text-gray-300">
+                                            <div>${a.kantor || '-'}</div>
+                                            <span class="text-[10px] text-gray-500">${a.homebase || ''}</span>
+                                        </td>
+                                        <td class="p-4 text-gray-300">
+                                            <div>${a.no_hp || '-'}</div>
+                                            <span class="text-[10px] text-gray-500">${a.email || ''}</span>
+                                        </td>
+                                        <td class="p-4 text-gray-300">
+                                            <div>${spouse ? spouse.nama : '<span class="text-gray-600">-</span>'}</div>
+                                            <span class="text-[10px] text-blue-400">${childrenCount} Anak</span>
+                                        </td>
+                                        <td class="p-4">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'Aktif' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400'}">${a.status}</span>
+                                        </td>
+                                        <td class="p-4 text-center">
+                                            <div class="flex items-center justify-center gap-1">
+                                                <button onclick="viewAnggotaDetail('${a.id}')" title="Detail Profil & Keluarga" class="p-1.5 bg-gray-800 hover:bg-gray-700 text-blue-400 rounded-lg"><i class="fa-solid fa-eye text-xs"></i></button>
+                                                <button onclick="openAnggotaModal('${a.id}')" title="Edit Anggota" class="p-1.5 bg-gray-800 hover:bg-gray-700 text-amber-400 rounded-lg"><i class="fa-solid fa-pen text-xs"></i></button>
+                                                <button onclick="deleteAnggota('${a.id}')" title="Hapus" class="p-1.5 bg-gray-800 hover:bg-red-600/30 text-rose-400 rounded-lg"><i class="fa-solid fa-trash text-xs"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination Controls (Standard 50 per page) -->
+                    <div class="p-4 border-t border-gray-800 flex justify-between items-center text-xs text-gray-400">
+                        <span>Menampilkan ${paginated.length} dari ${filtered.length} Anggota (Hal. ${state.currentPage} / ${totalPages})</span>
+                        <div class="flex gap-2">
+                            <button onclick="changePage(-1)" ${state.currentPage === 1 ? 'disabled' : ''} class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50">Prev</button>
+                            <button onclick="changePage(1)" ${state.currentPage >= totalPages ? 'disabled' : ''} class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANGGOTA FORM MODAL -->
+            <div id="anggotaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
+                    <div class="flex justify-between items-center pb-4 border-b border-gray-800 mb-4">
+                        <h3 id="anggotaModalTitle" class="text-base font-bold text-white">Tambah Anggota Baru</h3>
+                        <button onclick="closeAnggotaModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+
+                    <form onsubmit="handleAnggotaFormSubmit(event)" class="space-y-4">
+                        <input type="hidden" id="formAnggotaId">
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Nomor Anggota (Otomatis)</label>
+                                <input type="text" id="formNomorAnggota" readonly class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-blue-400 font-bold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Nama Lengkap *</label>
+                                <input type="text" id="formNama" required placeholder="Nama lengkap dengan gelar" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- Photo Section with File and Webcam option -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Foto Profil Anggota</label>
+                            <div class="flex items-center gap-4">
+                                <img id="formFotoPreview" src="https://placehold.co/100x100/1e293b/ffffff?text=E8" class="w-16 h-16 rounded-xl object-cover border border-gray-700">
+                                <input type="hidden" id="formFotoBase64">
+                                <div class="flex gap-2">
+                                    <label class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold cursor-pointer border border-gray-700">
+                                        <i class="fa-solid fa-upload mr-1"></i> Upload File
+                                        <input type="file" accept="image/*" onchange="handleFotoFileUpload(this, 'formFotoPreview', 'formFotoBase64')" class="hidden">
+                                    </label>
+                                    <button type="button" onclick="openCameraModal(data => { document.getElementById('formFotoPreview').src = data; document.getElementById('formFotoBase64').value = data; })" class="px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-semibold">
+                                        <i class="fa-solid fa-camera mr-1"></i> Kamera
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Kantor / Instansi</label>
+                                <input type="text" id="formKantor" placeholder="Nama kantor / pekerjaan" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Homebase / DPD</label>
+                                <input type="text" id="formHomebase" placeholder="Kota / Cabang" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Nomor HP / WhatsApp *</label>
+                                <input type="text" id="formNoHp" required placeholder="08123456789" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Email</label>
+                                <input type="email" id="formEmail" placeholder="email@domain.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Alamat Lengkap</label>
+                            <textarea id="formAlamat" rows="2" placeholder="Alamat domisili" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Tahun Bergabung</label>
+                                <input type="number" id="formTahunGabung" value="2026" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Status Keanggotaan</label>
+                                <select id="formStatus" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Non-Aktif">Non-Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-800 flex justify-end gap-3">
+                            <button type="button" onclick="closeAnggotaModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold">Batal</button>
+                            <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20">Simpan Data Anggota</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            `;
+        }
+
+        function handleAnggotaSearch(val) {
+            state.searchQuery = val;
+            state.currentPage = 1;
+            renderApp();
+        }
+
+        function changePage(delta) {
+            state.currentPage += delta;
+            renderApp();
+        }
+
+        function openAnggotaModal(id = null) {
+            const modal = document.getElementById('anggotaModal');
+            modal.classList.remove('hidden');
+
+            if (id) {
+                const item = state.anggota.find(a => a.id === id);
+                document.getElementById('anggotaModalTitle').innerText = "Edit Data Anggota";
+                document.getElementById('formAnggotaId').value = item.id;
+                document.getElementById('formNomorAnggota').value = item.nomor_anggota;
+                document.getElementById('formNama').value = item.nama;
+                document.getElementById('formFotoPreview').src = item.foto || 'https://placehold.co/100x100/1e293b/ffffff?text=E8';
+                document.getElementById('formFotoBase64').value = item.foto || '';
+                document.getElementById('formKantor').value = item.kantor || '';
+                document.getElementById('formHomebase').value = item.homebase || '';
+                document.getElementById('formNoHp').value = item.no_hp || '';
+                document.getElementById('formEmail').value = item.email || '';
+                document.getElementById('formAlamat').value = item.alamat || '';
+                document.getElementById('formTahunGabung').value = item.tahun_gabung || '2026';
+                document.getElementById('formStatus').value = item.status || 'Aktif';
+            } else {
+                document.getElementById('anggotaModalTitle').innerText = "Tambah Anggota Baru";
+                document.getElementById('formAnggotaId').value = "";
+                document.getElementById('formNomorAnggota').value = generateAutoMemberNo();
+                document.getElementById('formNama').value = "";
+                document.getElementById('formFotoPreview').src = 'https://placehold.co/100x100/1e293b/ffffff?text=E8';
+                document.getElementById('formFotoBase64').value = "";
+                document.getElementById('formKantor').value = "";
+                document.getElementById('formHomebase').value = "";
+                document.getElementById('formNoHp').value = "";
+                document.getElementById('formEmail').value = "";
+                document.getElementById('formAlamat').value = "";
+                document.getElementById('formTahunGabung').value = new Date().getFullYear().toString();
+                document.getElementById('formStatus').value = "Aktif";
+            }
+        }
+
+        function closeAnggotaModal() {
+            document.getElementById('anggotaModal').classList.add('hidden');
+        }
+
+        function handleFotoFileUpload(inputEl, previewId, base64InputId) {
+            if (inputEl.files && inputEl.files[0]) {
+                fileToBase64(inputEl.files[0]).then(b64 => {
+                    document.getElementById(previewId).src = b64;
+                    document.getElementById(base64InputId).value = b64;
+                });
+            }
+        }
+
+        function handleAnggotaFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('formAnggotaId').value;
+            const nomor_anggota = document.getElementById('formNomorAnggota').value;
+            const nama = document.getElementById('formNama').value.trim();
+            const foto = document.getElementById('formFotoBase64').value || document.getElementById('formFotoPreview').src;
+            const kantor = document.getElementById('formKantor').value.trim();
+            const homebase = document.getElementById('formHomebase').value.trim();
+            const no_hp = document.getElementById('formNoHp').value.trim();
+            const email = document.getElementById('formEmail').value.trim();
+            const alamat = document.getElementById('formAlamat').value.trim();
+            const tahun_gabung = document.getElementById('formTahunGabung').value;
+            const status = document.getElementById('formStatus').value;
+
+            if (id) {
+                // Update
+                const idx = state.anggota.findIndex(a => a.id === id);
+                if (idx !== -1) {
+                    state.anggota[idx] = { ...state.anggota[idx], nama, foto, kantor, homebase, no_hp, email, alamat, tahun_gabung, status };
+                }
+            } else {
+                // Create
+                const newAnggota = {
+                    id: 'ang-' + Date.now(),
+                    nomor_anggota,
+                    nama,
+                    foto,
+                    kantor,
+                    homebase,
+                    no_hp,
+                    email,
+                    alamat,
+                    tahun_gabung,
+                    status
+                };
+                state.anggota.unshift(newAnggota);
+
+                // Auto create member user account
+                const defaultUsername = nama.toLowerCase().split(' ')[0] + Math.floor(Math.random() * 100);
+                state.users.push({
+                    id: 'usr-' + Date.now(),
+                    username: defaultUsername,
+                    password_hash: 'member123',
+                    role: 'MEMBER',
+                    member_id: nomor_anggota,
+                    created_at: new Date().toISOString().split('T')[0]
+                });
+                saveEntityToStorage('e8_users', state.users);
+            }
+
+            saveEntityToStorage('e8_anggota', state.anggota);
+            closeAnggotaModal();
+            showToast('Data Anggota berhasil disimpan!');
+            renderApp();
+        }
+
+        function deleteAnggota(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data anggota ini beserta seluruh keluarga dan iuran terkait?')) {
+                state.anggota = state.anggota.filter(a => a.id !== id);
+                state.pasangan = state.pasangan.filter(p => p.anggota_id !== id);
+                state.anak = state.anak.filter(c => c.anggota_id !== id);
+                state.iuran = state.iuran.filter(i => i.anggota_id !== id);
+                
+                saveEntityToStorage('e8_anggota', state.anggota);
+                saveEntityToStorage('e8_pasangan', state.pasangan);
+                saveEntityToStorage('e8_anak', state.anak);
+                saveEntityToStorage('e8_iuran', state.iuran);
+
+                showToast('Anggota berhasil dihapus!');
+                renderApp();
+            }
+        }
+
+        let activeDetailAnggotaId = null;
+
+        function viewAnggotaDetail(id) {
+            activeDetailAnggotaId = id;
+            navigateTo('anggota-detail');
+        }
+
+        function renderAnggotaDetailView() {
+            const member = state.anggota.find(a => a.id === activeDetailAnggotaId) || state.anggota[0];
+            if (!member) return `<div class="p-8 text-center text-gray-500">Anggota tidak ditemukan</div>`;
+
+            const spouse = state.pasangan.find(p => p.anggota_id === member.id);
+            const children = state.anak.filter(c => c.anggota_id === member.id);
+
+            return `
+            <div class="space-y-6">
+                <!-- Back Header -->
+                <div class="flex items-center gap-3">
+                    <button onclick="navigateTo('anggota-list')" class="px-3 py-1.5 bg-gray-900 border border-gray-800 text-gray-300 rounded-xl hover:text-white text-xs font-semibold">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Daftar
+                    </button>
+                </div>
+
+                <!-- Main Member Profile Card -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-start">
+                    <img src="${member.foto || 'https://placehold.co/200x200/1e293b/ffffff?text=E8'}" class="w-28 h-28 rounded-2xl object-cover border-2 border-blue-500 shrink-0">
+                    <div class="flex-1 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-xl font-extrabold text-white">${member.nama}</h2>
+                                <p class="font-mono text-xs text-blue-400 font-bold mt-0.5">${member.nomor_anggota}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${member.status === 'Aktif' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400'}">${member.status}</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 text-xs text-gray-300">
+                            <div><span class="text-gray-500 block">Kantor:</span> ${member.kantor || '-'}</div>
+                            <div><span class="text-gray-500 block">Homebase:</span> ${member.homebase || '-'}</div>
+                            <div><span class="text-gray-500 block">Kontak WA:</span> ${member.no_hp || '-'}</div>
+                            <div><span class="text-gray-500 block">Email:</span> ${member.email || '-'}</div>
+                            <div><span class="text-gray-500 block">Tahun Bergabung:</span> ${member.tahun_gabung || '-'}</div>
+                            <div><span class="text-gray-500 block">Alamat:</span> ${member.alamat || '-'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spouse & Children Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    <!-- PASANGAN (SPOUSE) SECTION -->
+                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                        <div class="flex justify-between items-center pb-4 border-b border-gray-800 mb-4">
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-heart text-rose-500"></i> Data Suami / Istri
+                            </h3>
+                            <button onclick="openSpouseModal('${member.id}')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-rose-300 rounded-lg border border-gray-700">
+                                <i class="fa-solid fa-pen-to-square"></i> ${spouse ? 'Edit Pasangan' : 'Tambah Pasangan'}
+                            </button>
+                        </div>
+
+                        ${spouse ? `
+                            <div class="flex items-center gap-4">
+                                <img src="${spouse.foto || 'https://placehold.co/100x100/1e293b/ffffff?text=Pasangan'}" class="w-16 h-16 rounded-xl object-cover border border-gray-800">
+                                <div class="space-y-1 text-xs">
+                                    <h4 class="font-bold text-white text-sm">${spouse.nama}</h4>
+                                    <p class="text-gray-400">Tgl Lahir: ${spouse.tanggal_lahir || '-'}</p>
+                                    <p class="text-gray-400">No. HP: ${spouse.no_hp || '-'}</p>
+                                    <p class="text-gray-500 italic">${spouse.keterangan || '-'}</p>
+                                </div>
+                            </div>
+                        ` : `
+                            <p class="text-xs text-gray-500 italic text-center py-6">Belum ada data pasangan terdaftar.</p>
+                        `}
+                    </div>
+
+                    <!-- ANAK (CHILDREN) SECTION -->
+                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                        <div class="flex justify-between items-center pb-4 border-b border-gray-800 mb-4">
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-child text-amber-500"></i> Data Anak (${children.length})
+                            </h3>
+                            <button onclick="openChildModal('${member.id}')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-amber-300 rounded-lg border border-gray-700">
+                                <i class="fa-solid fa-plus"></i> Tambah Anak
+                            </button>
+                        </div>
+
+                        <div class="space-y-3">
+                            ${children.length === 0 ? `<p class="text-xs text-gray-500 italic text-center py-6">Belum ada data anak terdaftar.</p>` : ''}
+                            ${children.map((c, idx) => `
+                                <div class="p-3 bg-gray-950 rounded-xl border border-gray-800 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${c.foto || 'https://placehold.co/100x100/1e293b/ffffff?text=Anak'}" class="w-10 h-10 rounded-lg object-cover">
+                                        <div class="text-xs">
+                                            <h5 class="font-bold text-white">${idx + 1}. ${c.nama} <span class="text-[10px] text-gray-500">(${c.jenis_kelamin || '-'})</span></h5>
+                                            <p class="text-gray-400">Pendidikan: ${c.pendidikan || '-'} | Pekerjaan: ${c.pekerjaan || '-'}</p>
+                                            <p class="text-gray-500 text-[10px]">Tgl Lahir: ${c.tanggal_lahir || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="deleteChild('${c.id}')" class="p-1.5 bg-gray-800 hover:bg-red-600/30 text-rose-400 rounded-lg text-xs"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SPOUSE MODAL -->
+            <div id="spouseModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-800 mb-4">
+                        <h3 class="text-sm font-bold text-white">Kelola Data Pasangan</h3>
+                        <button onclick="closeSpouseModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <form onsubmit="handleSpouseSubmit(event)" class="space-y-3 text-xs">
+                        <input type="hidden" id="spouseAnggotaId">
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Nama Pasangan *</label>
+                            <input type="text" id="spouseNama" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Foto Pasangan</label>
+                            <div class="flex items-center gap-3">
+                                <img id="spouseFotoPreview" src="https://placehold.co/100x100/1e293b/ffffff?text=Foto" class="w-12 h-12 rounded-lg object-cover border border-gray-800">
+                                <input type="hidden" id="spouseFotoBase64">
+                                <label class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg cursor-pointer">
+                                    Upload File
+                                    <input type="file" accept="image/*" onchange="handleFotoFileUpload(this, 'spouseFotoPreview', 'spouseFotoBase64')" class="hidden">
+                                </label>
+                                <button type="button" onclick="openCameraModal(data => { document.getElementById('spouseFotoPreview').src = data; document.getElementById('spouseFotoBase64').value = data; })" class="px-3 py-1.5 bg-indigo-600/20 text-indigo-300 rounded-lg">Kamera</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-gray-300 mb-1">Tanggal Lahir</label>
+                                <input type="date" id="spouseTanggalLahir" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-gray-300 mb-1">Nomor HP</label>
+                                <input type="text" id="spouseNoHp" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Keterangan</label>
+                            <input type="text" id="spouseKeterangan" placeholder="Contoh: Suami / Istri" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                        </div>
+                        <div class="pt-3 border-t border-gray-800 flex justify-end gap-2">
+                            <button type="button" onclick="closeSpouseModal()" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-xl">Batal</button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- CHILD MODAL -->
+            <div id="childModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-800 mb-4">
+                        <h3 class="text-sm font-bold text-white">Tambah Data Anak</h3>
+                        <button onclick="closeChildModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <form onsubmit="handleChildSubmit(event)" class="space-y-3 text-xs">
+                        <input type="hidden" id="childAnggotaId">
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Nama Anak *</label>
+                            <input type="text" id="childNama" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-gray-300 mb-1">Jenis Kelamin</label>
+                                <select id="childJenisKelamin" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                                    <option value="Laki-laki">Laki-laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-gray-300 mb-1">Tanggal Lahir</label>
+                                <input type="date" id="childTanggalLahir" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-gray-300 mb-1">Pendidikan</label>
+                                <input type="text" id="childPendidikan" placeholder="SD / SMP / SMA / S1" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-gray-300 mb-1">Pekerjaan</label>
+                                <input type="text" id="childPekerjaan" placeholder="Pelajar / Mahasiswa" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-gray-800 flex justify-end gap-2">
+                            <button type="button" onclick="closeChildModal()" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-xl">Batal</button>
+                            <button type="submit" class="px-4 py-2 bg-amber-600 text-white font-bold rounded-xl">Simpan Anak</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            `;
+        }
+
+        function openSpouseModal(anggotaId) {
+            document.getElementById('spouseAnggotaId').value = anggotaId;
+            const existing = state.pasangan.find(p => p.anggota_id === anggotaId);
+            if (existing) {
+                document.getElementById('spouseNama').value = existing.nama;
+                document.getElementById('spouseTanggalLahir').value = existing.tanggal_lahir || '';
+                document.getElementById('spouseNoHp').value = existing.no_hp || '';
+                document.getElementById('spouseKeterangan').value = existing.keterangan || '';
+                document.getElementById('spouseFotoPreview').src = existing.foto || 'https://placehold.co/100x100/1e293b/ffffff?text=Foto';
+                document.getElementById('spouseFotoBase64').value = existing.foto || '';
+            } else {
+                document.getElementById('spouseNama').value = '';
+                document.getElementById('spouseTanggalLahir').value = '';
+                document.getElementById('spouseNoHp').value = '';
+                document.getElementById('spouseKeterangan').value = 'Istri';
+                document.getElementById('spouseFotoPreview').src = 'https://placehold.co/100x100/1e293b/ffffff?text=Foto';
+                document.getElementById('spouseFotoBase64').value = '';
+            }
+            document.getElementById('spouseModal').classList.remove('hidden');
+        }
+
+        function closeSpouseModal() {
+            document.getElementById('spouseModal').classList.add('hidden');
+        }
+
+        function handleSpouseSubmit(e) {
+            e.preventDefault();
+            const anggota_id = document.getElementById('spouseAnggotaId').value;
+            const nama = document.getElementById('spouseNama').value.trim();
+            const foto = document.getElementById('spouseFotoBase64').value || document.getElementById('spouseFotoPreview').src;
+            const tanggal_lahir = document.getElementById('spouseTanggalLahir').value;
+            const no_hp = document.getElementById('spouseNoHp').value.trim();
+            const keterangan = document.getElementById('spouseKeterangan').value.trim();
+
+            const idx = state.pasangan.findIndex(p => p.anggota_id === anggota_id);
+            if (idx !== -1) {
+                state.pasangan[idx] = { ...state.pasangan[idx], nama, foto, tanggal_lahir, no_hp, keterangan };
+            } else {
+                state.pasangan.push({ id: 'pas-' + Date.now(), anggota_id, nama, foto, tanggal_lahir, no_hp, keterangan });
+            }
+
+            saveEntityToStorage('e8_pasangan', state.pasangan);
+            closeSpouseModal();
+            showToast('Data Pasangan berhasil diperbarui!');
+            renderApp();
+        }
+
+        function openChildModal(anggotaId) {
+            document.getElementById('childAnggotaId').value = anggotaId;
+            document.getElementById('childNama').value = '';
+            document.getElementById('childJenisKelamin').value = 'Laki-laki';
+            document.getElementById('childTanggalLahir').value = '';
+            document.getElementById('childPendidikan').value = '';
+            document.getElementById('childPekerjaan').value = 'Pelajar';
+            document.getElementById('childModal').classList.remove('hidden');
+        }
+
+        function closeChildModal() {
+            document.getElementById('childModal').classList.add('hidden');
+        }
+
+        function handleChildSubmit(e) {
+            e.preventDefault();
+            const anggota_id = document.getElementById('childAnggotaId').value;
+            const nama = document.getElementById('childNama').value.trim();
+            const jenis_kelamin = document.getElementById('childJenisKelamin').value;
+            const tanggal_lahir = document.getElementById('childTanggalLahir').value;
+            const pendidikan = document.getElementById('childPendidikan').value.trim();
+            const pekerjaan = document.getElementById('childPekerjaan').value.trim();
+
+            state.anak.push({
+                id: 'ank-' + Date.now(),
+                anggota_id,
+                nama,
+                foto: '',
+                jenis_kelamin,
+                tanggal_lahir,
+                pendidikan,
+                pekerjaan,
+                keterangan: 'Anak'
+            });
+
+            saveEntityToStorage('e8_anak', state.anak);
+            closeChildModal();
+            showToast('Anak berhasil ditambahkan!');
+            renderApp();
+        }
+
+        function deleteChild(childId) {
+            if (confirm('Hapus data anak ini?')) {
+                state.anak = state.anak.filter(c => c.id !== childId);
+                saveEntityToStorage('e8_anak', state.anak);
+                showToast('Data anak berhasil dihapus!');
+                renderApp();
+            }
+        }
+
+        function renderIuranManagementView() {
+            return `
+            <div class="space-y-6">
+                <!-- Add Payment Form Card -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-blue-500"></i> Catat Pembayaran Iuran Anggota
+                    </h3>
+
+                    <form onsubmit="handleIuranSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Cari / Pilih Anggota *</label>
+                            <select id="iuranAnggotaId" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                                <option value="">-- Pilih Anggota --</option>
+                                ${state.anggota.map(a => `<option value="${a.id}">${a.nama} (${a.nomor_anggota})</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Bulan Iuran *</label>
+                            <select id="iuranBulan" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                                ${['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'].map(m => `<option value="${m}">${m}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Tahun *</label>
+                            <input type="number" id="iuranTahun" value="2026" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Jumlah Nominal (Rp) *</label>
+                            <input type="number" id="iuranJumlah" value="150000" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white font-mono">
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Tanggal Bayar</label>
+                            <input type="date" id="iuranTanggalBayar" value="${new Date().toISOString().split('T')[0]}" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Metode Pembayaran</label>
+                            <select id="iuranMetode" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                                <option value="Transfer BCA">Transfer BCA</option>
+                                <option value="Transfer QRIS">Transfer QRIS</option>
+                                <option value="Cash / Tunai">Cash / Tunai</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Status</label>
+                            <select id="iuranStatus" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                                <option value="Lunas">Lunas (Lunas - Hijau)</option>
+                                <option value="Belum Bayar">Belum Bayar (Merah)</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition">
+                                <i class="fa-solid fa-save mr-1"></i> Simpan Transaksi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Iuran History Table -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-white">Rekapitulasi Iuran Seluruh Member</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-950 text-gray-400 font-semibold border-b border-gray-800">
+                                <tr>
+                                    <th class="p-4">Anggota</th>
+                                    <th class="p-4">Periode</th>
+                                    <th class="p-4">Nominal</th>
+                                    <th class="p-4">Tanggal Bayar</th>
+                                    <th class="p-4">Metode</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800/60">
+                                ${state.iuran.map(i => {
+                                    const m = state.anggota.find(a => a.id === i.anggota_id);
+                                    const isLunas = i.status === 'Lunas';
+                                    return `
+                                    <tr class="hover:bg-gray-800/40 transition">
+                                        <td class="p-4 font-bold text-white">${m ? m.nama : 'Unknown'} <span class="font-mono text-gray-500 font-normal">(${m ? m.nomor_anggota : ''})</span></td>
+                                        <td class="p-4 text-gray-300">${i.bulan} ${i.tahun}</td>
+                                        <td class="p-4 font-mono text-white">Rp ${(Number(i.jumlah)||0).toLocaleString('id-ID')}</td>
+                                        <td class="p-4 text-gray-400">${i.tanggal_bayar || '-'}</td>
+                                        <td class="p-4 text-gray-400">${i.metode || '-'}</td>
+                                        <td class="p-4">
+                                            <span class="px-2.5 py-1 rounded text-[10px] font-extrabold ${isLunas ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}">
+                                                ${isLunas ? 'LUNAS' : 'BELUM BAYAR'}
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-center">
+                                            <button onclick="deleteIuran('${i.id}')" class="p-1.5 bg-gray-800 hover:bg-red-600/30 text-rose-400 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function handleIuranSubmit(e) {
+            e.preventDefault();
+            const anggota_id = document.getElementById('iuranAnggotaId').value;
+            const bulan = document.getElementById('iuranBulan').value;
+            const tahun = document.getElementById('iuranTahun').value;
+            const jumlah = document.getElementById('iuranJumlah').value;
+            const tanggal_bayar = document.getElementById('iuranTanggalBayar').value;
+            const metode = document.getElementById('iuranMetode').value;
+            const status = document.getElementById('iuranStatus').value;
+
+            state.iuran.unshift({
+                id: 'iur-' + Date.now(),
+                anggota_id,
+                bulan,
+                tahun,
+                jumlah,
+                tanggal_bayar,
+                metode,
+                status,
+                keterangan: 'Input Admin'
+            });
+
+            saveEntityToStorage('e8_iuran', state.iuran);
+            showToast('Transaksi iuran berhasil dicatat!');
+            renderApp();
+        }
+
+        function deleteIuran(id) {
+            if (confirm('Hapus rekap iuran ini?')) {
+                state.iuran = state.iuran.filter(i => i.id !== id);
+                saveEntityToStorage('e8_iuran', state.iuran);
+                showToast('Rekap iuran berhasil dihapus!');
+                renderApp();
+            }
+        }
+
+        function renderMemberIuranView() {
+            const member = state.anggota.find(a => a.nomor_anggota === state.currentUser?.member_id) || state.anggota[0];
+            const myIuran = state.iuran.filter(i => i.anggota_id === member?.id);
+
+            return `
+            <div class="space-y-6 max-w-4xl mx-auto">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-white">Status Iuran Anggota: ${member?.nama}</h3>
+                        <p class="font-mono text-xs text-blue-400 mt-0.5">${member?.nomor_anggota}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-400">Total Dibayarkan:</span>
+                        <h4 class="text-xl font-extrabold text-emerald-400 font-mono">Rp ${myIuran.filter(i => i.status === 'Lunas').reduce((s, x) => s + Number(x.jumlah), 0).toLocaleString('id-ID')}</h4>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <div class="p-4 border-b border-gray-800">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tabel Riwayat Pembayaran</h4>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-950 text-gray-400">
+                                <tr>
+                                    <th class="p-4">Bulan & Tahun</th>
+                                    <th class="p-4">Nominal</th>
+                                    <th class="p-4">Tanggal Bayar</th>
+                                    <th class="p-4">Metode</th>
+                                    <th class="p-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800">
+                                ${['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'].map(m => {
+                                    const rec = myIuran.find(i => i.bulan === m && i.tahun === '2026');
+                                    const isLunas = rec && rec.status === 'Lunas';
+                                    return `
+                                    <tr>
+                                        <td class="p-4 font-bold text-white">${m} 2026</td>
+                                        <td class="p-4 font-mono text-gray-300">Rp 150.000</td>
+                                        <td class="p-4 text-gray-400">${rec ? rec.tanggal_bayar : '-'}</td>
+                                        <td class="p-4 text-gray-400">${rec ? rec.metode : '-'}</td>
+                                        <td class="p-4">
+                                            <span class="px-2.5 py-1 rounded text-[10px] font-bold ${isLunas ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+                                                ${isLunas ? 'Lunas' : 'Belum Bayar'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        let activeKeuanganChartInstance = null;
+
+        function renderKeuanganDashboardView() {
+            const totalPenerimaan = state.iuran.filter(i => i.status === 'Lunas').reduce((sum, i) => sum + (Number(i.jumlah) || 0), 0);
+            const totalPengeluaran = 150000;
+            const saldo = totalPenerimaan - totalPengeluaran;
+
+            return `
+            <div class="space-y-6">
+                <!-- Stat Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
+                        <p class="text-xs font-bold text-gray-400 uppercase">Total Penerimaan Kas</p>
+                        <h3 class="text-2xl font-extrabold text-blue-400 font-mono mt-1">Rp ${totalPenerimaan.toLocaleString('id-ID')}</h3>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
+                        <p class="text-xs font-bold text-gray-400 uppercase">Total Pengeluaran Kas</p>
+                        <h3 class="text-2xl font-extrabold text-rose-400 font-mono mt-1">Rp ${totalPengeluaran.toLocaleString('id-ID')}</h3>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
+                        <p class="text-xs font-bold text-gray-400 uppercase">Saldo Kas Saat Ini</p>
+                        <h3 class="text-2xl font-extrabold text-emerald-400 font-mono mt-1">Rp ${saldo.toLocaleString('id-ID')}</h3>
+                    </div>
+                </div>
+
+                <!-- Interactive Chart Switcher Card -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <div>
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-blue-500"></i> Visualisasi Keuangan
+                            </h3>
+                            <p class="text-xs text-gray-400">Pilih jenis grafik untuk analisis kas</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="switchKeuanganChart('bar')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-white rounded-lg border border-gray-700">Bar Chart</button>
+                            <button onclick="switchKeuanganChart('line')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-white rounded-lg border border-gray-700">Line Chart</button>
+                            <button onclick="switchKeuanganChart('pie')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-white rounded-lg border border-gray-700">Pie Chart</button>
+                            <button onclick="switchKeuanganChart('area')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-white rounded-lg border border-gray-700">Area Chart</button>
+                        </div>
+                    </div>
+
+                    <div class="h-80">
+                        <canvas id="keuanganChartCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function switchKeuanganChart(type) {
+            initKeuanganChart(type);
+        }
+
+        function initKeuanganChart(type = 'bar') {
+            setTimeout(() => {
+                const canvas = document.getElementById('keuanganChartCanvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+
+                if (activeKeuanganChartInstance) {
+                    activeKeuanganChartInstance.destroy();
+                }
+
+                const months = ['Jan 2026', 'Feb 2026', 'Mar 2026', 'Apr 2026'];
+                const penerimaan = [450000, 300000, 150000, 0];
+                const pengeluaran = [50000, 100000, 0, 0];
+
+                let chartType = type === 'area' ? 'line' : type;
+
+                activeKeuanganChartInstance = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Penerimaan',
+                                data: penerimaan,
+                                backgroundColor: type === 'area' ? 'rgba(16, 185, 129, 0.2)' : type === 'pie' ? '#10b981' : '#10b981',
+                                borderColor: '#10b981',
+                                borderWidth: 2,
+                                fill: type === 'area'
+                            },
+                            {
+                                label: 'Pengeluaran',
+                                data: pengeluaran,
+                                backgroundColor: type === 'area' ? 'rgba(244, 63, 94, 0.2)' : type === 'pie' ? '#f43f5e' : '#f43f5e',
+                                borderColor: '#f43f5e',
+                                borderWidth: 2,
+                                fill: type === 'area'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#9ca3af' } } },
+                        scales: type !== 'pie' ? {
+                            x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                            y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } }
+                        } : {}
+                    }
+                });
+            }, 100);
+        }
+
+        let activeDetailKegiatanId = null;
+
+        function renderKegiatanListView() {
+            const isAdmin = state.currentUser?.role === 'ADMIN';
+
+            return `
+            <div class="space-y-6">
+                <div class="flex justify-between items-center bg-gray-900 p-4 rounded-2xl border border-gray-800">
+                    <h3 class="text-sm font-bold text-white">Daftar Kegiatan & Agenda Paguyuban</h3>
+                    ${isAdmin ? `
+                        <button onclick="openKegiatanModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-500/20">
+                            <i class="fa-solid fa-plus"></i> Tambah Kegiatan Baru
+                        </button>
+                    ` : ''}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${state.kegiatan.map(k => {
+                        const photos = state.kegiatanFoto.filter(f => f.kegiatan_id === k.id);
+                        const coverPhoto = photos[0]?.file_path || 'https://placehold.co/600x400/1e293b/ffffff?text=E8+Kegiatan';
+                        return `
+                        <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-700 transition flex flex-col justify-between">
+                            <div>
+                                <div class="h-48 relative overflow-hidden bg-gray-950">
+                                    <img src="${coverPhoto}" class="w-full h-full object-cover">
+                                    <span class="absolute top-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold rounded-lg border border-white/10">
+                                        <i class="fa-solid fa-images mr-1"></i> ${photos.length} Foto
+                                    </span>
+                                </div>
+                                <div class="p-5 space-y-2">
+                                    <h4 class="text-base font-bold text-white line-clamp-1">${k.nama_kegiatan}</h4>
+                                    <p class="text-xs text-gray-400 flex items-center gap-2">
+                                        <span><i class="fa-regular fa-calendar text-blue-400"></i> ${k.tanggal}</span>
+                                        <span><i class="fa-solid fa-location-dot text-rose-400"></i> ${k.tempat}</span>
+                                    </p>
+                                    <p class="text-xs text-gray-300 line-clamp-2 mt-2">${k.deskripsi}</p>
+                                </div>
+                            </div>
+
+                            <div class="p-5 pt-0 flex items-center justify-between">
+                                <button onclick="viewKegiatanDetail('${k.id}')" class="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold">
+                                    Lihat Galeri & Komentar
+                                </button>
+                                ${isAdmin ? `
+                                    <div class="flex gap-1">
+                                        <button onclick="openKegiatanModal('${k.id}')" class="p-2 bg-gray-800 hover:bg-gray-700 text-amber-400 rounded-lg text-xs"><i class="fa-solid fa-pen"></i></button>
+                                        <button onclick="deleteKegiatan('${k.id}')" class="p-2 bg-gray-800 hover:bg-red-600/30 text-rose-400 rounded-lg text-xs"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+
+            <!-- KEGIATAN FORM MODAL (Admin) -->
+            <div id="kegiatanModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-800 mb-4">
+                        <h3 id="kegiatanModalTitle" class="text-base font-bold text-white">Kelola Kegiatan</h3>
+                        <button onclick="closeKegiatanModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <form onsubmit="handleKegiatanSubmit(event)" class="space-y-4 text-xs">
+                        <input type="hidden" id="formKegiatanId">
+                        
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Nama Kegiatan *</label>
+                            <input type="text" id="formKegiatanNama" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-gray-300 mb-1">Tanggal Kegiatan *</label>
+                                <input type="date" id="formKegiatanTanggal" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-gray-300 mb-1">Tempat Pelaksanaan *</label>
+                                <input type="text" id="formKegiatanTempat" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Deskripsi Kegiatan</label>
+                            <textarea id="formKegiatanDeskripsi" rows="3" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white"></textarea>
+                        </div>
+
+                        <!-- Multi-Photo Upload Section -->
+                        <div class="p-4 bg-gray-950 rounded-xl border border-gray-800">
+                            <label class="block font-semibold text-white mb-2">Upload Multi-Foto Kegiatan</label>
+                            <div class="flex items-center gap-2 mb-3">
+                                <label class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold cursor-pointer">
+                                    <i class="fa-solid fa-images mr-1"></i> Pilih Banyak Foto File
+                                    <input type="file" multiple accept="image/*" onchange="handleMultiPhotoUpload(this)" class="hidden">
+                                </label>
+                                <button type="button" onclick="openCameraModal(data => appendKegiatanPhotoPreview(data))" class="px-3 py-2 bg-indigo-600/20 text-indigo-300 rounded-xl text-xs font-semibold">
+                                    <i class="fa-solid fa-camera mr-1"></i> Ambil Kamera
+                                </button>
+                            </div>
+
+                            <div id="kegiatanPhotoPreviews" class="grid grid-cols-4 gap-2"></div>
+                        </div>
+
+                        <div class="pt-3 border-t border-gray-800 flex justify-end gap-2">
+                            <button type="button" onclick="closeKegiatanModal()" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-xl">Batal</button>
+                            <button type="submit" class="px-5 py-2 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20">Simpan Kegiatan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            `;
+        }
+
+        let pendingKegiatanPhotos = [];
+
+        function openKegiatanModal(id = null) {
+            pendingKegiatanPhotos = [];
+            const modal = document.getElementById('kegiatanModal');
+            modal.classList.remove('hidden');
+
+            if (id) {
+                const k = state.kegiatan.find(x => x.id === id);
+                document.getElementById('kegiatanModalTitle').innerText = "Edit Data Kegiatan";
+                document.getElementById('formKegiatanId').value = k.id;
+                document.getElementById('formKegiatanNama').value = k.nama_kegiatan;
+                document.getElementById('formKegiatanTanggal').value = k.tanggal;
+                document.getElementById('formKegiatanTempat').value = k.tempat;
+                document.getElementById('formKegiatanDeskripsi').value = k.deskripsi;
+
+                // Load existing photos
+                const photos = state.kegiatanFoto.filter(f => f.kegiatan_id === k.id);
+                pendingKegiatanPhotos = photos.map(p => ({ id: p.id, data: p.file_path }));
+            } else {
+                document.getElementById('kegiatanModalTitle').innerText = "Tambah Kegiatan Baru";
+                document.getElementById('formKegiatanId').value = "";
+                document.getElementById('formKegiatanNama').value = "";
+                document.getElementById('formKegiatanTanggal').value = new Date().toISOString().split('T')[0];
+                document.getElementById('formKegiatanTempat').value = "";
+                document.getElementById('formKegiatanDeskripsi').value = "";
+            }
+
+            renderKegiatanPhotoPreviews();
+        }
+
+        function closeKegiatanModal() {
+            document.getElementById('kegiatanModal').classList.add('hidden');
+        }
+
+        function handleMultiPhotoUpload(input) {
+            if (input.files && input.files.length > 0) {
+                Array.from(input.files).forEach(file => {
+                    fileToBase64(file).then(b64 => {
+                        appendKegiatanPhotoPreview(b64);
+                    });
+                });
+            }
+        }
+
+        function appendKegiatanPhotoPreview(b64) {
+            pendingKegiatanPhotos.push({ id: 'temp-' + Date.now() + Math.random(), data: b64 });
+            renderKegiatanPhotoPreviews();
+        }
+
+        function removeKegiatanPhotoPreview(tempId) {
+            pendingKegiatanPhotos = pendingKegiatanPhotos.filter(p => p.id !== tempId);
+            renderKegiatanPhotoPreviews();
+        }
+
+        function renderKegiatanPhotoPreviews() {
+            const container = document.getElementById('kegiatanPhotoPreviews');
+            container.innerHTML = pendingKegiatanPhotos.map(p => `
+                <div class="relative group h-20 bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+                    <img src="${p.data}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removeKegiatanPhotoPreview('${p.id}')" class="absolute top-1 right-1 p-1 bg-red-600/80 text-white rounded text-[10px]"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function handleKegiatanSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('formKegiatanId').value;
+            const nama_kegiatan = document.getElementById('formKegiatanNama').value.trim();
+            const tanggal = document.getElementById('formKegiatanTanggal').value;
+            const tempat = document.getElementById('formKegiatanTempat').value.trim();
+            const deskripsi = document.getElementById('formKegiatanDeskripsi').value.trim();
+
+            let targetId = id;
+
+            if (id) {
+                const idx = state.kegiatan.findIndex(x => x.id === id);
+                if (idx !== -1) {
+                    state.kegiatan[idx] = { ...state.kegiatan[idx], nama_kegiatan, tanggal, tempat, deskripsi, updated_at: new Date().toISOString() };
+                }
+            } else {
+                targetId = 'keg-' + Date.now();
+                state.kegiatan.unshift({
+                    id: targetId,
+                    nama_kegiatan,
+                    tanggal,
+                    tempat,
+                    deskripsi,
+                    created_by: state.currentUser?.username || 'Admin',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                });
+            }
+
+            // Sync photos
+            state.kegiatanFoto = state.kegiatanFoto.filter(f => f.kegiatan_id !== targetId);
+            pendingKegiatanPhotos.forEach((p, idx) => {
+                state.kegiatanFoto.push({
+                    id: 'kf-' + Date.now() + idx,
+                    kegiatan_id: targetId,
+                    file_path: p.data,
+                    sort_order: idx + 1
+                });
+            });
+
+            saveEntityToStorage('e8_kegiatan', state.kegiatan);
+            saveEntityToStorage('e8_kegiatan_foto', state.kegiatanFoto);
+
+            closeKegiatanModal();
+            showToast('Data Kegiatan & Galeri berhasil disimpan!');
+            renderApp();
+        }
+
+        function deleteKegiatan(id) {
+            if (confirm('Hapus kegiatan dan seluruh dokumentasi foto terkait?')) {
+                state.kegiatan = state.kegiatan.filter(k => k.id !== id);
+                state.kegiatanFoto = state.kegiatanFoto.filter(f => f.kegiatan_id !== id);
+                state.komentar = state.komentar.filter(k => k.kegiatan_id !== id);
+
+                saveEntityToStorage('e8_kegiatan', state.kegiatan);
+                saveEntityToStorage('e8_kegiatan_foto', state.kegiatanFoto);
+                saveEntityToStorage('e8_komentar', state.komentar);
+
+                showToast('Kegiatan berhasil dihapus!');
+                renderApp();
+            }
+        }
+
+        function viewKegiatanDetail(id) {
+            activeDetailKegiatanId = id;
+            navigateTo('kegiatan-detail');
+        }
+
+        function renderKegiatanDetailView() {
+            const k = state.kegiatan.find(x => x.id === activeDetailKegiatanId) || state.kegiatan[0];
+            if (!k) return `<div class="p-8 text-center text-gray-500">Kegiatan tidak ditemukan.</div>`;
+
+            const photos = state.kegiatanFoto.filter(f => f.kegiatan_id === k.id);
+            const comments = state.komentar.filter(c => c.kegiatan_id === k.id);
+            const isAdmin = state.currentUser?.role === 'ADMIN';
+
+            return `
+            <div class="space-y-6">
+                <!-- Back Button -->
+                <button onclick="navigateTo('kegiatan-list')" class="px-3 py-1.5 bg-gray-900 border border-gray-800 text-gray-300 rounded-xl hover:text-white text-xs font-semibold">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Galeri
+                </button>
+
+                <!-- Activity Details Banner -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-3">
+                    <h2 class="text-xl font-extrabold text-white">${k.nama_kegiatan}</h2>
+                    <div class="flex flex-wrap gap-4 text-xs text-gray-400">
+                        <span><i class="fa-regular fa-calendar text-blue-400 mr-1"></i> ${k.tanggal}</span>
+                        <span><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> ${k.tempat}</span>
+                        <span><i class="fa-solid fa-user text-emerald-400 mr-1"></i> Dibuat oleh ${k.created_by}</span>
+                    </div>
+                    <p class="text-xs text-gray-300 leading-relaxed pt-2 border-t border-gray-800">${k.deskripsi}</p>
+                </div>
+
+                <!-- PHOTO GALLERY LIGHTBOX GRID -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
+                        <span><i class="fa-solid fa-images text-indigo-500 mr-2"></i> Galeri Dokumentasi Foto (${photos.length})</span>
+                    </h3>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        ${photos.map((p, idx) => `
+                            <div onclick="openLightbox(${idx}, '${k.id}')" class="h-40 bg-gray-950 rounded-xl overflow-hidden border border-gray-800 cursor-pointer group relative">
+                                <img src="${p.file_path}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+                                    <i class="fa-solid fa-magnifying-glass-plus text-xl"></i>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- COMMENTS SECTION -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-amber-500"></i> Komentar Anggota (${comments.length})
+                    </h3>
+
+                    ${state.currentUser ? `
+                        <form onsubmit="handleCommentSubmit(event, '${k.id}')" class="flex gap-2">
+                            <input type="text" id="commentText" required placeholder="Tulis komentar mengenai kegiatan..." class="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500">
+                            <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-500/20">Kirim</button>
+                        </form>
+                    ` : '<p class="text-xs text-gray-500 italic">Silakan login untuk memberikan komentar.</p>'}
+
+                    <div class="space-y-3 pt-2">
+                        ${comments.map(c => `
+                            <div class="p-3 bg-gray-950 rounded-xl border border-gray-800 flex justify-between items-start gap-3">
+                                <div class="flex items-start gap-3">
+                                    <img src="${c.foto || 'https://placehold.co/100x100/1e293b/ffffff?text=U'}" class="w-8 h-8 rounded-full object-cover border border-gray-800">
+                                    <div class="text-xs">
+                                        <h5 class="font-bold text-white">${c.nama} <span class="text-[10px] text-gray-500 font-normal ml-2">${c.tanggal}</span></h5>
+                                        <p class="text-gray-300 mt-1">${c.komentar}</p>
+                                    </div>
+                                </div>
+                                ${isAdmin ? `
+                                    <button onclick="deleteComment('${c.id}')" title="Moderasi / Hapus Komentar" class="p-1 bg-gray-800 hover:bg-red-600/30 text-rose-400 rounded text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        // Lightbox Functions
+        function openLightbox(index, kegiatanId) {
+            const photos = state.kegiatanFoto.filter(f => f.kegiatan_id === kegiatanId);
+            state.lightbox.photos = photos;
+            state.lightbox.currentIndex = index;
+            state.lightbox.scale = 1;
+
+            updateLightboxContent();
+            document.getElementById('lightboxModal').classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightboxModal').classList.add('hidden');
+        }
+
+        function updateLightboxContent() {
+            const current = state.lightbox.photos[state.lightbox.currentIndex];
+            if (!current) return;
+
+            const img = document.getElementById('lightboxImage');
+            img.src = current.file_path;
+            img.style.transform = `scale(${state.lightbox.scale})`;
+
+            document.getElementById('lightboxCounter').innerText = `${state.lightbox.currentIndex + 1} / ${state.lightbox.photos.length}`;
+            document.getElementById('lightboxCaption').innerText = `Foto Dokumentasi Eighter (${state.lightbox.currentIndex + 1})`;
+        }
+
+        function prevLightboxImage() {
+            if (state.lightbox.currentIndex > 0) {
+                state.lightbox.currentIndex--;
+                state.lightbox.scale = 1;
+                updateLightboxContent();
+            }
+        }
+
+        function nextLightboxImage() {
+            if (state.lightbox.currentIndex < state.lightbox.photos.length - 1) {
+                state.lightbox.currentIndex++;
+                state.lightbox.scale = 1;
+                updateLightboxContent();
+            }
+        }
+
+        function zoomLightbox(delta) {
+            state.lightbox.scale = Math.max(0.5, Math.min(3, state.lightbox.scale + delta));
+            document.getElementById('lightboxImage').style.transform = `scale(${state.lightbox.scale})`;
+        }
+
+        function handleCommentSubmit(e, kegiatanId) {
+            e.preventDefault();
+            const text = document.getElementById('commentText').value.trim();
+            const member = state.anggota.find(a => a.nomor_anggota === state.currentUser?.member_id);
+
+            state.komentar.unshift({
+                id: 'kom-' + Date.now(),
+                kegiatan_id: kegiatanId,
+                user_id: state.currentUser?.id || 'usr-guest',
+                nama: member ? member.nama : state.currentUser?.username,
+                foto: member ? member.foto : '',
+                komentar: text,
+                tanggal: new Date().toLocaleString('id-ID')
+            });
+
+            saveEntityToStorage('e8_komentar', state.komentar);
+            showToast('Komentar berhasil dikirim!');
+            renderApp();
+        }
+
+        function deleteComment(commentId) {
+            if (confirm('Hapus komentar ini?')) {
+                state.komentar = state.komentar.filter(c => c.id !== commentId);
+                saveEntityToStorage('e8_komentar', state.komentar);
+                showToast('Komentar berhasil dihapus!');
+                renderApp();
+            }
+        }
+
+        function renderBankSettingsView() {
+            return `
+            <div class="max-w-xl mx-auto bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5">
+                <h3 class="text-sm font-bold text-white border-b border-gray-800 pb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-building-columns text-blue-500"></i> Data Bank & QRIS Organisasi
+                </h3>
+
+                <form onsubmit="handleBankSubmit(event)" class="space-y-4 text-xs">
+                    <div>
+                        <label class="block font-semibold text-gray-300 mb-1">Nama Bank *</label>
+                        <input type="text" id="bankNama" value="${state.bank.namaBank}" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-300 mb-1">Nama Pemilik Rekening *</label>
+                        <input type="text" id="bankPemilik" value="${state.bank.pemilik}" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-300 mb-1">Nomor Rekening *</label>
+                        <input type="text" id="bankNomor" value="${state.bank.nomorRekening}" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-gray-300 mb-1">Upload Gambar QRIS</label>
+                        <div class="flex items-center gap-4">
+                            <img id="qrisPreview" src="${state.bank.qris || 'https://placehold.co/150x150/1e293b/ffffff?text=QRIS+E8'}" class="w-24 h-24 rounded-xl object-cover border border-gray-800">
+                            <input type="hidden" id="qrisBase64" value="${state.bank.qris || ''}">
+                            <label class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold cursor-pointer border border-gray-700">
+                                Upload QRIS Baru
+                                <input type="file" accept="image/*" onchange="handleFotoFileUpload(this, 'qrisPreview', 'qrisBase64')" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20">
+                        Simpan Data Bank & QRIS
+                    </button>
+                </form>
+            </div>
+            `;
+        }
+
+        function handleBankSubmit(e) {
+            e.preventDefault();
+            state.bank.namaBank = document.getElementById('bankNama').value.trim();
+            state.bank.pemilik = document.getElementById('bankPemilik').value.trim();
+            state.bank.nomorRekening = document.getElementById('bankNomor').value.trim();
+            state.bank.qris = document.getElementById('qrisBase64').value || state.bank.qris;
+
+            saveEntityToStorage('e8_bank', state.bank);
+            showToast('Data bank berhasil diperbarui!');
+            renderApp();
+        }
+
+        function renderSettingsView() {
+            return `
+            <div class="max-w-2xl mx-auto space-y-6">
+                <!-- App Branding Form -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5">
+                    <h3 class="text-sm font-bold text-white border-b border-gray-800 pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-blue-500"></i> Pengaturan Branding & Nama Aplikasi
+                    </h3>
+
+                    <form onsubmit="handleSettingsSubmit(event)" class="space-y-4 text-xs">
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Nama Aplikasi *</label>
+                            <input type="text" id="settingAppName" value="${state.settings.appName}" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Deskripsi Organisasi</label>
+                            <textarea id="settingDescription" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-white">${state.settings.description}</textarea>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-gray-300 mb-1">Logo Organisasi</label>
+                            <div class="flex items-center gap-4">
+                                <img id="logoPreview" src="${state.settings.logo || 'https://placehold.co/100x100/1e293b/ffffff?text=Logo'}" class="w-16 h-16 rounded-xl object-cover border border-gray-800">
+                                <input type="hidden" id="logoBase64" value="${state.settings.logo || ''}">
+                                <label class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold cursor-pointer border border-gray-700">
+                                    Ganti Logo
+                                    <input type="file" accept="image/*" onchange="handleFotoFileUpload(this, 'logoPreview', 'logoBase64')" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20">
+                            Simpan Pengaturan Organisasi
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Backup & Restore System Data -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+                    <h3 class="text-sm font-bold text-white border-b border-gray-800 pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-database text-emerald-500"></i> Backup & Restore Database
+                    </h3>
+                    <p class="text-xs text-gray-400">Unduh seluruh data aplikasi sebagai file JSON untuk dicadangkan atau dipindahkan.</p>
+                    <div class="flex gap-3">
+                        <button onclick="exportDatabaseJSON()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-2">
+                            <i class="fa-solid fa-download"></i> Backup JSON Database
+                        </button>
+                        <label class="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold rounded-xl text-xs cursor-pointer border border-gray-700 flex items-center gap-2">
+                            <i class="fa-solid fa-upload"></i> Restore JSON
+                            <input type="file" accept=".json" onchange="importDatabaseJSON(this)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function handleSettingsSubmit(e) {
+            e.preventDefault();
+            state.settings.appName = document.getElementById('settingAppName').value.trim();
+            state.settings.description = document.getElementById('settingDescription').value.trim();
+            state.settings.logo = document.getElementById('logoBase64').value || state.settings.logo;
+
+            saveEntityToStorage('e8_settings', state.settings);
+            showToast('Pengaturan aplikasi berhasil disimpan!');
+            renderApp();
+        }
+
+        function exportDatabaseJSON() {
+            const fullData = {
+                settings: state.settings,
+                bank: state.bank,
+                users: state.users,
+                anggota: state.anggota,
+                pasangan: state.pasangan,
+                anak: state.anak,
+                iuran: state.iuran,
+                kegiatan: state.kegiatan,
+                kegiatanFoto: state.kegiatanFoto,
+                komentar: state.komentar
+            };
+
+            const str = JSON.stringify(fullData, null, 2);
+            const blob = new Blob([str], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_eighter_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            showToast('Database berhasil diexport!');
+        }
+
+        function importDatabaseJSON(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (parsed.anggota) {
+                            localStorage.setItem('e8_settings', JSON.stringify(parsed.settings || DEFAULT_SETTINGS));
+                            localStorage.setItem('e8_bank', JSON.stringify(parsed.bank || DEFAULT_BANK));
+                            localStorage.setItem('e8_users', JSON.stringify(parsed.users || []));
+                            localStorage.setItem('e8_anggota', JSON.stringify(parsed.anggota || []));
+                            localStorage.setItem('e8_pasangan', JSON.stringify(parsed.pasangan || []));
+                            localStorage.setItem('e8_anak', JSON.stringify(parsed.anak || []));
+                            localStorage.setItem('e8_iuran', JSON.stringify(parsed.iuran || []));
+                            localStorage.setItem('e8_kegiatan', JSON.stringify(parsed.kegiatan || []));
+                            localStorage.setItem('e8_kegiatan_foto', JSON.stringify(parsed.kegiatanFoto || []));
+                            localStorage.setItem('e8_komentar', JSON.stringify(parsed.komentar || []));
+
+                            showToast('Database berhasil di-restore!');
+                            renderApp();
+                        }
+                    } catch (err) {
+                        showToast('Format JSON file tidak valid!', 'error');
+                    }
+                };
+                reader.readAsText(input.files[0]);
+            }
+        }
+
+        function renderPublicCheckView() {
+            const query = (document.getElementById('publicSearchQuery')?.value || '').toLowerCase();
+            const results = state.anggota.filter(a => {
+                return !query || a.nama.toLowerCase().includes(query) || a.nomor_anggota.toLowerCase().includes(query);
+            });
+
+            return `
+            <div class="max-w-3xl mx-auto space-y-6">
+                <!-- Search Box Header -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center space-y-3">
+                    <h2 class="text-xl font-extrabold text-white">Pencarian & Verifikasi Anggota Publik</h2>
+                    <p class="text-xs text-gray-400">Verifikasi keanggataan resmi Paguyuban Eighter tanpa perlu login</p>
+                    
+                    <div class="relative max-w-lg mx-auto pt-2">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        <input type="text" id="publicSearchQuery" value="${query}" oninput="renderApp()" placeholder="Masukkan Nomor Anggota (BC8-...) atau Nama..." class="w-full bg-gray-950 border border-gray-800 rounded-xl pl-11 pr-4 py-3 text-xs text-white focus:outline-none focus:border-blue-500 shadow-inner">
+                    </div>
+                </div>
+
+                <!-- Results Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    ${results.length === 0 ? `<div class="col-span-2 text-center py-12 text-gray-500 text-xs">Anggota tidak ditemukan.</div>` : ''}
+                    ${results.map(a => `
+                        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center gap-4">
+                            <img src="${a.foto || 'https://placehold.co/100x100/1e293b/ffffff?text=E8'}" class="w-16 h-16 rounded-xl object-cover border border-gray-700">
+                            <div class="space-y-1 text-xs">
+                                <h4 class="font-bold text-white text-sm">${a.nama}</h4>
+                                <p class="font-mono text-blue-400 font-bold">${a.nomor_anggota}</p>
+                                <p class="text-gray-400">Tahun Gabung: ${a.tahun_gabung || '-'}</p>
+                                <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'Aktif' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${a.status}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            `;
+        }
+
+        window.addEventListener('hashchange', () => {
+            renderApp();
+        });
+
+        window.onload = function() {
+            renderApp();
+        };
+    </script>
+</body>
+</html>
